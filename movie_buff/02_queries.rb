@@ -16,8 +16,21 @@ end
 def cast_list(title)
   # List all the actors for a particular movie, given the title.
   # Sort the results by starring order (ord). Show the actor id and name.
-  # Actor.select(:id, :name)
-  #   .joins(:movies, :castings)
+  
+ # Actor.select(:id, :name, 'castings.ord').distinct
+ #      .joins(:movies, :castings)
+ #      .where(movies: { title: title} )
+ #      .order('castings.ord asc' )
+# Actor
+#    .select(:id, :name)
+#    .joins(:movies)
+#    .where(movies: { title: title })
+#    .order('castings.ord')
+  
+  Casting.select('actors.id, actors.name')
+         .joins(:movie, :actor)
+         .where(movie: { title: title} )
+         .order(:ord)
 
 end
 
@@ -26,11 +39,30 @@ def vanity_projects
   # starring actor. Show the movie id, title, and director's name.
 
   # Note: Directors appear in the 'actors' table.
-  
+    #Movie.select(:id, :title, 'actors.name')
+    #     .joins(:castings, :actors)
+    #     .where('castings.ord = 1 AND movies.director_id = castings.actor_id AND actors.id = castings.actor_id')
+
+        Movie.select(:id, :title, 'actors.name')
+         .joins(:actors)
+         .where('castings.ord = 1 AND movies.director_id = castings.actor_id')
 end
 
 def most_supportive
   # Find the two actors with the largest number of non-starring roles.
   # Show each actor's id, name, and number of supporting roles.
-  
+   # Casting.select(:actor_id, 'actors.name', 'COUNT(actors.id)' )
+   #        .joins(:actor)
+   #        .group('actors.name')
+   #        .having('MIN(ord) > 1')
+   #        .order('COUNT(actors.id) DESC')
+   #        .limit(2)
+
+    Actor.select(:id, :name, 'COUNT(actors.id) AS roles')
+      .joins(:castings)
+      .group(:id)
+      .where('ord != 1')
+      .order('roles DESC')
+      .limit(2)
+      
 end
